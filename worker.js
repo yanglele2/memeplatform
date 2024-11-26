@@ -1,8 +1,9 @@
 addEventListener('fetch', event => {
-  event.respondWith(handleRequest(event.request))
+  event.respondWith(handleRequest(event))
 })
 
-async function handleRequest(request) {
+async function handleRequest(event) {
+  const request = event.request;
   const corsHeaders = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
@@ -34,7 +35,7 @@ async function handleRequest(request) {
   // 图片生成端点
   if (url.pathname === '/api/generate-image' && request.method === 'POST') {
     try {
-      const API_KEY = env.ALIYUN_API_KEY
+      const API_KEY = event.env.ALIYUN_API_KEY
       if (!API_KEY) {
         throw new Error('API key not configured')
       }
@@ -79,7 +80,7 @@ async function handleRequest(request) {
   // 任务状态检查端点
   if (url.pathname.startsWith('/api/task-status/') && request.method === 'GET') {
     try {
-      const API_KEY = env.ALIYUN_API_KEY
+      const API_KEY = event.env.ALIYUN_API_KEY
       if (!API_KEY) {
         throw new Error('API key not configured')
       }

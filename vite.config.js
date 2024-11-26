@@ -5,11 +5,14 @@ export default defineConfig({
   plugins: [react()],
   server: {
     proxy: {
-      '/api/dashscope': {
-        target: 'https://dashscope.aliyuncs.com',
+      '/api': {
+        target: process.env.NODE_ENV === 'development' 
+          ? 'http://localhost:8787'  // 本地开发时的 Worker 地址
+          : 'https://memeplatform-api.你的worker子域名.workers.dev', // 生产环境 Worker 地址
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api\/dashscope/, '')
+        secure: false,
+        ws: true
       }
     }
   }
-}) 
+})

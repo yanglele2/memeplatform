@@ -31,7 +31,19 @@ const app = express();
 
 // 允许所有来源的请求
 app.use(cors({
-  origin: '*',
+  origin: function(origin, callback) {
+    const allowedOrigins = [
+      'http://localhost:5173',  // Vite 开发服务器
+      'https://memeplatform.pages.dev', // Cloudflare Pages
+      undefined // 允许无 origin 的请求（比如来自 Postman）
+    ];
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
@@ -191,14 +203,13 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: err.message });
 });
 
+// 启动服务器
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log('Environment variables status:', {
-    NODE_ENV: process.env.NODE_ENV,
-    API_KEY_EXISTS: !!API_KEY,
-    API_KEY_LENGTH: API_KEY ? API_KEY.length : 0,
-    PORT: PORT,
-    PWD: process.cwd(),
-    ENV_FILE_PATH: resolve(__dirname, '.env')
+  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server timestamp: ${new Date().toISOString()}`);
+  console.log('CORS configuration:', {
+    origins: ['http://localhost:5173', 'https://memeplatform.pages.dev'],
+    methods: ['GET', 'POST'],
+    credentials: true
   });
 });

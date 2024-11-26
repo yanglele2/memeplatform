@@ -70,7 +70,7 @@ const generatePrompt = (emotionType) => {
       表情2: ['happy tears', 'wide smile', 'jubilant expression', 'excited gestures'],
       动作: ['jumping for joy', 'dancing around', 'hugging others', 'clapping hands'],
       事件: ['achievement unlocked', 'dream come true', 'perfect score', 'surprise gift'],
-      表情描述: ['eyes crinkled with joy', 'face lit up', 'genuine smile', 'happy glow'],
+      表情描述: ['eyes shining with joy', 'face lit up', 'genuine smile', 'happy glow'],
       人物特征: ['bright eyes', 'upright posture', 'energetic movement', 'confident stride'],
       情绪: ['elated', 'overjoyed', 'ecstatic', 'blissful'],
       细节描述: ['bounce in step', 'light movements', 'graceful gestures', 'vibrant energy'],
@@ -122,12 +122,16 @@ const generatePrompt = (emotionType) => {
   });
 };
 
+// 添加 API URL 配置
+const API_URL = import.meta.env.PROD 
+  ? 'https://memeplatform-api.outdoorequip2023.workers.dev'
+  : 'http://localhost:8787';
+
+// 健康检查函数
 const checkServerHealth = async () => {
   try {
-    const response = await fetch('http://localhost:3001/health');
-    if (!response.ok) {
-      throw new Error('Server health check failed');
-    }
+    const response = await fetch(`${API_URL}/health`);
+    if (!response.ok) throw new Error('Server health check failed');
     return true;
   } catch (error) {
     console.error('Server health check failed:', error);
@@ -135,6 +139,7 @@ const checkServerHealth = async () => {
   }
 };
 
+// 生成图片函数
 const generateImage = async (prompt) => {
   const isServerHealthy = await checkServerHealth();
   if (!isServerHealthy) {
@@ -143,7 +148,7 @@ const generateImage = async (prompt) => {
 
   try {
     console.log('使用提示词生成图片:', prompt);
-    const submitResponse = await fetch('http://localhost:3001/api/generate-image', {
+    const submitResponse = await fetch(`${API_URL}/api/generate-image`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -174,7 +179,7 @@ const generateImage = async (prompt) => {
     const maxRetries = 5; // 最多等待5次
     
     while (retries < maxRetries) {
-      const statusResponse = await fetch(`http://localhost:3001/api/task-status/${taskId}`);
+      const statusResponse = await fetch(`${API_URL}/api/task-status/${taskId}`);
       
       if (!statusResponse.ok) {
         throw new Error(`状态查询失败: ${statusResponse.status}`);
@@ -273,7 +278,7 @@ const generateGPTText = async (emotion) => {
         messages: [
           {
             role: 'system',
-            content: `你是一个专业的meme文案创作者。请按照以下要求创作:
+            content: `你是一个专业的meme文案创作者。请按照以下要求创作：
 
 1. 严格返回两行文字,第一行是顶部文字,第二行是底部文字,用换行符分隔
 2. 文案要有强烈的反差感和意外性,能引发共鸣
